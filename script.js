@@ -50,11 +50,16 @@ const displayController = (() => {
             cell.classList.add("win");
             console.log(cell);
         }
-    }
+    };
+    const updateMessage = message => {
+        const messageDiv = document.querySelector(".message");
+        messageDiv.textContent = message;
+    };
     return {
         renderBoard,
         updateCell,
         highlightWinningMarkers,
+        updateMessage,
     };
 })(); 
 
@@ -65,6 +70,7 @@ const gameController = (() => {
     let _activePlayer = _player1;
     const startNewGame = () => {
         displayController.renderBoard();
+        displayController.updateMessage(`Player ${_activePlayer.getMarker()}'s turn`);
     };
     const _switchPlayer = () => {
         if (_activePlayer === _player1) {
@@ -108,13 +114,27 @@ const gameController = (() => {
     // Let player update their marker by clicking in the cell
     const play = clickedCell => {
         if (clickedCell.textContent === "") {
+            // Update the value in the board
             gameBoard.updateValue(clickedCell.id, _activePlayer.getMarker());
+            // Display the marker on the board
             displayController.updateCell(clickedCell, _activePlayer.getMarker());
+            // Switch player
             _switchPlayer();
+            displayController.updateMessage(`Player ${_activePlayer.getMarker()}'s turn`);
+            // Check if the game is over
             [winner, positions] = _checkWinner();
-            // Highlight the winning markers
+            // Highlight the winning markers and display winner
             if (winner === _player1.getMarker() || winner === _player2.getMarker()) {
                 displayController.highlightWinningMarkers(positions);
+                if (winner === _player1.getMarker()) {
+                    displayController.updateMessage(`Player ${_player1.getMarker()} won!`);
+                } else {
+                    displayController.updateMessage(`Player ${_player2.getMarker()} won!`);
+                }
+            }
+            // Update messge if it's a tie
+            if (winner === "tie") {
+                displayController.updateMessage("It's a tie!");
             }
         }
     };

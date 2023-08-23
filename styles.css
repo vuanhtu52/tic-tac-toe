@@ -24,13 +24,20 @@ body {
     display: grid;
     grid-template-columns: 1fr 3fr 1fr;
     grid-template-rows: 1fr;
+    padding-top: 30px;
 }
 
 .main-content {
     display: flex;
     flex-direction: column;
+    gap: 30px;
     align-items: center;
     background-color: #c5c3c6;
+}
+
+.message {
+    font-size: 40px;
+    color: #46494b;
 }
 
 .board {

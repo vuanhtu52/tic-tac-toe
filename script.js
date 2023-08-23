@@ -5,6 +5,7 @@ const Player = marker => {
     }
 };
 
+// Keep track of the moves
 const gameBoard = (() => {
     let _board = [];
     for (let i = 0; i < 9; i++) {
@@ -20,6 +21,7 @@ const gameBoard = (() => {
     };
 })();
 
+// Update the display
 const displayController = (() => {
     const _createCell = (value, index) => {
         let cell = document.createElement("div");
@@ -48,9 +50,10 @@ const displayController = (() => {
     };
 })(); 
 
+// Control the flow of the game
 const gameController = (() => {
     let _player1 = Player("X");
-    let _player2 = Player("0");
+    let _player2 = Player("O");
     let _activePlayer = _player1;
     const startNewGame = () => {
         displayController.renderBoard();
@@ -62,13 +65,44 @@ const gameController = (() => {
             _activePlayer = _player1;
         }
     }
+    const _checkWinner = () => {
+        const board = gameBoard.getBoard();
+        // Check if a player has won
+        const winCases = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6], 
+            [1, 4, 7],
+            [2, 5, 8], 
+            [0, 4, 8], 
+            [2, 4, 6],
+        ];
+        for (const indices of winCases) {
+            if (board[indices[0]] === board[indices[1]] && board[indices[1]] === board[indices[2]]) {
+                if (board[indices[0]] === _player1.getMarker()) {
+                    return _player1.getMarker();
+                } else if (board[indices[0]] === _player2.getMarker()) {
+                    return _player2.getMarker();
+                }
+            }            
+        }
+
+        // Check if it's a tie
+        if (!board.includes("")) {
+            return "tie";
+        }
+
+        // Return "none" if the game is not finished
+        return "none";
+    }
     // Let player update their marker by clicking in the cell
     const play = clickedCell => {
         if (clickedCell.textContent === "") {
-            console.log(clickedCell.id);
             gameBoard.updateValue(clickedCell.id, _activePlayer.getMarker());
             displayController.updateCell(clickedCell, _activePlayer.getMarker());
             _switchPlayer();
+            console.log(_checkWinner());
         }
     };
     

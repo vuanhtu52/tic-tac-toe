@@ -52,3 +52,7 @@ body {
     font-weight: 900;
     font-size: 80px;
 }
+
+.cell:hover {
+    background-color: #d8e4e9;
+}

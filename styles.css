@@ -5,6 +5,8 @@ body {
     grid-template-columns: 1fr;
     grid-template-rows: max-content 1fr;
     height: 100vh;
+    font-family: 'Roboto', sans-serif;
+    font-family: 'Varela Round', sans-serif;
 }
 
 .title {
@@ -31,8 +33,22 @@ body {
     background-color: #c5c3c6;
 }
 
-.grid {
-    width: 200px;
-    height: 200px;
-    background-color: white;
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, max-content);
+    grid-template-rows: repeat(3, max-content);
+    border: 2px solid black;
+}
+
+.cell {
+    aspect-ratio: 1 /1;
+    width: 150px;
+    background-color: #ededee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #555;
+    color: #555;
+    font-weight: 900;
+    font-size: 80px;
 }

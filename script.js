@@ -44,9 +44,17 @@ const displayController = (() => {
     const updateCell = (cell, value) => {
         cell.textContent = value;
     };
+    const highlightWinningMarkers = positions => {
+        for (const id of positions) {
+            const cell = document.getElementById(id);
+            cell.classList.add("win");
+            console.log(cell);
+        }
+    }
     return {
         renderBoard,
         updateCell,
+        highlightWinningMarkers,
     };
 })(); 
 
@@ -65,6 +73,7 @@ const gameController = (() => {
             _activePlayer = _player1;
         }
     }
+    // Check when the game is over and returns the positions of winning markers
     const _checkWinner = () => {
         const board = gameBoard.getBoard();
         // Check if a player has won
@@ -81,20 +90,20 @@ const gameController = (() => {
         for (const indices of winCases) {
             if (board[indices[0]] === board[indices[1]] && board[indices[1]] === board[indices[2]]) {
                 if (board[indices[0]] === _player1.getMarker()) {
-                    return _player1.getMarker();
+                    return [_player1.getMarker(), indices];
                 } else if (board[indices[0]] === _player2.getMarker()) {
-                    return _player2.getMarker();
+                    return [_player2.getMarker(), indices];
                 }
             }            
         }
 
         // Check if it's a tie
         if (!board.includes("")) {
-            return "tie";
+            return ["tie", []];
         }
 
         // Return "none" if the game is not finished
-        return "none";
+        return ["none", []];
     }
     // Let player update their marker by clicking in the cell
     const play = clickedCell => {
@@ -102,7 +111,11 @@ const gameController = (() => {
             gameBoard.updateValue(clickedCell.id, _activePlayer.getMarker());
             displayController.updateCell(clickedCell, _activePlayer.getMarker());
             _switchPlayer();
-            console.log(_checkWinner());
+            [winner, positions] = _checkWinner();
+            // Highlight the winning markers
+            if (winner === _player1.getMarker() || winner === _player2.getMarker()) {
+                displayController.highlightWinningMarkers(positions);
+            }
         }
     };
     

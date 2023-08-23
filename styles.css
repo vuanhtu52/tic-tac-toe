@@ -56,3 +56,7 @@ body {
 .cell:hover {
     background-color: #d8e4e9;
 }
+
+.win {
+    color: #15803d;
+}

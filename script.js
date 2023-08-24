@@ -1,5 +1,6 @@
 const Player = marker => {
     const getMarker = () => marker;
+
     return {
         getMarker,
     }
@@ -11,22 +12,33 @@ const gameBoard = (() => {
     for (let i = 0; i < 9; i++) {
         _board.push("");
     }
-    const getBoard = () =>  _board;
+
+    const getBoard = () => _board;
+
     const updateValue = (index, value) => {
         _board[index] = value;
-    }
+    };
+
+    const reset = () => {
+        _board = [];
+        for (let i = 0; i < 9; i++) {
+            _board.push("");
+        }
+    };
+
     return {
         getBoard,
         updateValue,
+        reset,
     };
 })();
 
-const _handleCellClick = event => {
-    gameController.play(event.currentTarget);
-};
-
 // Update the display
 const displayController = (() => {
+    const _handleCellClick = event => {
+        gameController.play(event.currentTarget);
+    };
+
     const _createCell = (value, index) => {
         let cell = document.createElement("div");
         cell.id = index;
@@ -35,52 +47,88 @@ const displayController = (() => {
         cell.addEventListener("click", _handleCellClick, true);
         return cell;
     };
+
     const renderBoard = () => {
         const board = gameBoard.getBoard();
+        const boardDiv = document.querySelector(".board");
+        // Remove old cells
+        while (boardDiv.lastElementChild) {
+            boardDiv.removeChild(boardDiv.lastElementChild);
+        }
+        // Create new cells
         board.forEach((value, index) => {
             let cell = _createCell(value, index);
-            const boardDiv= document.querySelector(".board");
             boardDiv.appendChild(cell);
         });
     };
+
     const updateCell = (cell, value) => {
         cell.textContent = value;
     };
+
     const highlightWinningMarkers = positions => {
         for (const id of positions) {
             const cell = document.getElementById(id);
             cell.classList.add("win");
         }
     };
+
     const updateMessage = message => {
         const messageDiv = document.querySelector(".message");
         messageDiv.textContent = message;
     };
-    const freezeBoard = () => { 
+
+    const freezeBoard = () => {
         const board = gameBoard.getBoard();
         for (let i = 0; i < board.length; i++) {
             const cell = document.getElementById(i);
             cell.removeEventListener("click", _handleCellClick, true);
         }
     }
+
+    const reset = () => {
+        renderBoard();
+        updateMessage(`Player ${gameController.getActivePlayer().getMarker()}'s turn`);
+    };
+
+    const _setRestartButton = () => {
+        const restartButton = document.querySelector(".restart");
+        restartButton.addEventListener("click", () => {
+            gameController.startNewGame();
+        });
+    };
+    _setRestartButton(); // Set the restart button once initially
+
     return {
         renderBoard,
         updateCell,
         highlightWinningMarkers,
         updateMessage,
         freezeBoard,
+        reset
     };
-})(); 
+})();
 
 // Control the flow of the game
 const gameController = (() => {
     let _player1 = Player("X");
     let _player2 = Player("O");
     let _activePlayer = _player1;
-    const startNewGame = () => {
-        displayController.renderBoard();
-        displayController.updateMessage(`Player ${_activePlayer.getMarker()}'s turn`);
+
+    const _reset = () => {
+        _player1 = Player("X");
+        _player2 = Player("O");
+        _activePlayer = _player1;
     };
+
+    const startNewGame = () => {
+        gameBoard.reset();
+        _reset();
+        displayController.reset();
+    };
+
+    const getActivePlayer = () => _activePlayer;
+
     const _switchPlayer = () => {
         if (_activePlayer === _player1) {
             _activePlayer = _player2;
@@ -96,10 +144,10 @@ const gameController = (() => {
             [0, 1, 2],
             [3, 4, 5],
             [6, 7, 8],
-            [0, 3, 6], 
+            [0, 3, 6],
             [1, 4, 7],
-            [2, 5, 8], 
-            [0, 4, 8], 
+            [2, 5, 8],
+            [0, 4, 8],
             [2, 4, 6],
         ];
         for (const indices of winCases) {
@@ -109,7 +157,7 @@ const gameController = (() => {
                 } else if (board[indices[0]] === _player2.getMarker()) {
                     return [_player2.getMarker(), indices];
                 }
-            }            
+            }
         }
 
         // Check if it's a tie
@@ -120,6 +168,7 @@ const gameController = (() => {
         // Return "none" if the game is not finished
         return ["none", []];
     }
+    
     // Let player update their marker by clicking in the cell
     const play = clickedCell => {
         if (clickedCell.textContent === "") {
@@ -151,10 +200,11 @@ const gameController = (() => {
             }
         }
     };
-    
+
     return {
         startNewGame,
         play,
+        getActivePlayer,
     };
 })();
 

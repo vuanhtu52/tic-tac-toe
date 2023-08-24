@@ -71,3 +71,21 @@ body {
 .win {
     color: #15803d;
 }
+
+.restart {
+    font-size: 40px;
+    padding: 20px 40px;
+    border-radius: 10px;
+    border: none;
+    background-color: #4c5c68;
+    color: #b0e4db;
+}
+
+.restart:hover {
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
+.restart:active {
+    transform: translateY(4px);
+}

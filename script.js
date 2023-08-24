@@ -21,6 +21,10 @@ const gameBoard = (() => {
     };
 })();
 
+const _handleCellClick = event => {
+    gameController.play(event.currentTarget);
+};
+
 // Update the display
 const displayController = (() => {
     const _createCell = (value, index) => {
@@ -28,9 +32,7 @@ const displayController = (() => {
         cell.id = index;
         cell.className = "cell";
         cell.textContent = value;
-        cell.addEventListener("click", () => {
-            gameController.play(cell);
-        });
+        cell.addEventListener("click", _handleCellClick, true);
         return cell;
     };
     const renderBoard = () => {
@@ -48,18 +50,25 @@ const displayController = (() => {
         for (const id of positions) {
             const cell = document.getElementById(id);
             cell.classList.add("win");
-            console.log(cell);
         }
     };
     const updateMessage = message => {
         const messageDiv = document.querySelector(".message");
         messageDiv.textContent = message;
     };
+    const freezeBoard = () => { 
+        const board = gameBoard.getBoard();
+        for (let i = 0; i < board.length; i++) {
+            const cell = document.getElementById(i);
+            cell.removeEventListener("click", _handleCellClick, true);
+        }
+    }
     return {
         renderBoard,
         updateCell,
         highlightWinningMarkers,
         updateMessage,
+        freezeBoard,
     };
 })(); 
 
@@ -123,14 +132,18 @@ const gameController = (() => {
             displayController.updateMessage(`Player ${_activePlayer.getMarker()}'s turn`);
             // Check if the game is over
             [winner, positions] = _checkWinner();
-            // Highlight the winning markers and display winner
+            // If someone has won
             if (winner === _player1.getMarker() || winner === _player2.getMarker()) {
+                // Highlight the winning markers
                 displayController.highlightWinningMarkers(positions);
+                // Display winner
                 if (winner === _player1.getMarker()) {
                     displayController.updateMessage(`Player ${_player1.getMarker()} won!`);
                 } else {
                     displayController.updateMessage(`Player ${_player2.getMarker()} won!`);
                 }
+                // Freeze the board
+                displayController.freezeBoard();
             }
             // Update messge if it's a tie
             if (winner === "tie") {

@@ -47,6 +47,10 @@ body {
     border: 2px solid black;
 }
 
+.freeze {
+    pointer-events: none;
+}
+
 .cell {
     aspect-ratio: 1 /1;
     width: 150px;

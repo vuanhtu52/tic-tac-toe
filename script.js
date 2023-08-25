@@ -6,6 +6,35 @@ const Player = marker => {
     }
 };
 
+// Inherit from Player
+const AI = marker => {
+    const prototype = Player(marker);
+
+    // The maximum is exclusive and the minimum is inclusive
+    const _getRandomInt = (min, max) => {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min) + min); 
+    };
+
+    // Return the index of the next move
+    const makeRandomMove = () => {
+        const board = gameBoard.getBoard();
+        let availableCells = [];
+        for (let i = 0; i < board.length; i++) {
+            if (board[i] === "") {
+                availableCells.push(i);
+            }
+        }
+        const randomIdex = _getRandomInt(0, availableCells.length);
+        return availableCells[randomIdex];
+    };
+    
+    return Object.assign({},  prototype, {
+        makeRandomMove,
+    });
+}
+
 // Keep track of the moves
 const gameBoard = (() => {
     let _board = [];
@@ -88,23 +117,31 @@ const displayController = (() => {
 
     const reset = () => {
         renderBoard();
-        updateMessage(`Player ${gameController.getActivePlayer().getMarker()}'s turn`);
-        _setModeSelector();
+        if (gameController.getMode() === "friend") {
+            updateMessage(`Player ${gameController.getActivePlayer().getMarker()}'s turn`);
+        } else {
+            updateMessage("Make a move");
+        }
+        
     };
 
-    const _setRestartButton = () => {
+    const setRestartButton = () => {
         const restartButton = document.querySelector(".restart");
         restartButton.addEventListener("click", () => {
             gameController.startNewGame();
         });
     };
-    _setRestartButton(); // Set the restart button once initially
 
-    const _setModeSelector = () => {
+    const setModeSelector = () => {
         const selector = document.querySelector("#modes");
         selector.addEventListener("change", () => {
-            console.log(selector.value);
+            gameController.startNewGame();
         });
+    }
+
+    const getMode = () => {
+        const selector = document.querySelector("#modes");
+        return selector.value;
     }
 
     return {
@@ -113,19 +150,36 @@ const displayController = (() => {
         highlightWinningMarkers,
         updateMessage,
         freezeBoard,
-        reset
+        reset,
+        getMode,
+        setRestartButton,
+        setModeSelector,
     };
 })();
 
 // Control the flow of the game
 const gameController = (() => {
     let _player1 = Player("X");
-    let _player2 = Player("O");
+    let _player2 = AI("O");
     let _activePlayer = _player1;
+    let _mode = displayController.getMode();
+
+    // Initialize the game at the beginning
+    const init = () => {
+        displayController.setRestartButton();
+        displayController.setModeSelector();
+        startNewGame();
+    };
 
     const _reset = () => {
+        _mode = document.querySelector("#modes").value;
         _player1 = Player("X");
-        _player2 = Player("O");
+        if (_mode == "friend") {
+            _player2 = Player("O");
+        } else {
+            _player2 = AI("O");
+        }
+        _player2 = AI("O");
         _activePlayer = _player1;
     };
 
@@ -186,7 +240,21 @@ const gameController = (() => {
             displayController.updateCell(clickedCell, _activePlayer.getMarker());
             // Switch player
             _switchPlayer();
-            displayController.updateMessage(`Player ${_activePlayer.getMarker()}'s turn`);
+            if (_mode === "friend") {
+                displayController.updateMessage(`Player ${_activePlayer.getMarker()}'s turn`);
+            }
+            
+            // If the mode is easy, make the next move with AI
+            if (_mode === "easy" && gameBoard.getBoard().includes("")) {
+                const position = _player2.makeRandomMove();
+                // Update the value in the board
+                gameBoard.updateValue(position, _activePlayer.getMarker());
+                // Display the marker on the board
+                displayController.updateCell(document.getElementById(position.toString()), _activePlayer.getMarker());
+                // Switch player
+                _switchPlayer();
+            }
+
             // Check if the game is over
             [winner, positions] = _checkWinner();
             // If someone has won
@@ -209,11 +277,20 @@ const gameController = (() => {
         }
     };
 
+    const setMode = mode => {
+        _mode = mode;
+    };
+
+    const getMode = () =>  _mode;
+
     return {
+        init,
         startNewGame,
         play,
         getActivePlayer,
+        setMode,
+        getMode,
     };
 })();
 
-gameController.startNewGame();
+gameController.init();

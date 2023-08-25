@@ -89,6 +89,7 @@ const displayController = (() => {
     const reset = () => {
         renderBoard();
         updateMessage(`Player ${gameController.getActivePlayer().getMarker()}'s turn`);
+        _setModeSelector();
     };
 
     const _setRestartButton = () => {
@@ -98,6 +99,13 @@ const displayController = (() => {
         });
     };
     _setRestartButton(); // Set the restart button once initially
+
+    const _setModeSelector = () => {
+        const selector = document.querySelector("#modes");
+        selector.addEventListener("change", () => {
+            console.log(selector.value);
+        });
+    }
 
     return {
         renderBoard,

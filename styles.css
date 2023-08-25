@@ -22,10 +22,28 @@ body {
 .content {
     background-color: #c5c3c6;
     display: grid;
-    grid-template-columns: 1fr 3fr 1fr;
+    grid-template-columns: 1fr 2fr 1fr;
     grid-template-rows: 1fr;
+    gap: 20px;
     padding-top: 30px;
 }
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.sidebar > div:first-child {
+    font-size: 20px;
+}
+
+/* THE MODE SELECTOR */
+
+
+
+/* END OF MODE SELECTOR */
 
 .main-content {
     display: flex;
@@ -69,6 +87,10 @@ body {
 }
 
 .win {
+    background-color: #b0e4db;
+}
+
+.win:hover {
     background-color: #b0e4db;
 }
 

@@ -39,11 +39,12 @@ body {
     font-size: 20px;
 }
 
-/* THE MODE SELECTOR */
-
-
-
-/* END OF MODE SELECTOR */
+#modes {
+    font-size: 16px;
+    padding: 10px;
+    background-color: #4c5c68;
+    color: #b0e4db;
+}
 
 .main-content {
     display: flex;

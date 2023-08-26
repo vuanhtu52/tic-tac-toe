@@ -29,9 +29,123 @@ const AI = marker => {
         const randomIdex = _getRandomInt(0, availableCells.length);
         return availableCells[randomIdex];
     };
+
+    // Check if there is any move left on the board
+    const _hasMovesLeft = board => {
+        return board.includes("");
+    };
+
+    // Evaluate the value of the current board. Returns +10, -10 or 0 depending on the winner
+    const _evaluate = board => {
+        // Check if a player has won
+        const winCases = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6],
+        ];
+        for (const indices of winCases) {
+            if (board[indices[0]] === board[indices[1]] && board[indices[1]] === board[indices[2]]) {
+                if (board[indices[0]] === gameController.getPlayer1().getMarker()) {
+                    return 10;
+                } else if (board[indices[0]] === gameController.getPlayer2().getMarker()) {
+                    return -10;
+                }
+            }
+        }
+
+        // Return 0 if none has won the game
+        return 0;
+    };
+
+    // Calculate the score for all each move recursively
+    const _minimax = (board, depth, isMax) => {
+        let score = _evaluate(board);
+
+        // Return 10 if the maximizer has won
+        if (score === 10) {
+            return score;
+        }
+
+        // Return -10 if the minimizer has won
+        if (score === -10) {
+            return score;
+        }
+
+        // Return 0 if it is a tie
+        if (_hasMovesLeft(board) === false) {
+            return 0;
+        }
+
+        // If it is the maximizer's move
+        if (isMax) {
+            let best = -1000;
+            // Traverse all cells
+            for (let i = 0; i < board.length; i++) {
+                // Check if the cell is empty
+                if (board[i] === "") {
+                    // Make the move
+                    board[i] = gameController.getPlayer1().getMarker();
+                    // Call minimax recursively and choose the maximum value
+                    best = Math.max(best, _minimax(board, depth+1, !isMax));
+                    // Undo the move
+                    board[i] = "";
+                }
+            }
+            return best;
+        }
+
+        // If it is the minimizer's move
+        if (isMax === false) {
+            let best = 1000;
+            // Traver all cells
+            for (let i = 0; i < board.length; i++) {
+                // Check if the cell is empty
+                if (board[i] === "") {
+                    // Make the move
+                    board[i] = gameController.getPlayer2().getMarker();
+                    // Call minimax recursively and choose the minimum value
+                    best = Math.min(best, _minimax(board, depth+1, !isMax));
+                    // Undo the move
+                    board[i] = "";
+                }
+            }
+            return best;
+        }
+    };
+
+    // Return the index of the best move using minmax algorithm
+    const makeBestMove = board => {
+        let bestVal = 1000;
+        let bestPosition = -1;
+
+        // Traverse all cells, evaluate minimax function for all empty cells and return the cell with optimal value
+        for (let i = 0; i < board.length; i++) {
+            // Check if the cell is empty
+            if (board[i] === "") {
+                // Make the move
+                board[i] = gameController.getActivePlayer().getMarker();
+                // Compute evaluation for this move
+                let moveVal = _minimax(board, 0, true);
+                // Undo the move
+                board[i] = "";
+                // If the value of the current move is less than the best value, update best
+                if (moveVal < bestVal) {
+                    bestPosition = i;
+                    bestVal = moveVal;
+                }
+            }
+        }
+        return bestPosition;
+    };
     
     return Object.assign({},  prototype, {
         makeRandomMove,
+        makeBestMove,
     });
 }
 
@@ -189,6 +303,10 @@ const gameController = (() => {
         displayController.reset();
     };
 
+    const getPlayer1 = () => _player1;
+
+    const getPlayer2 = () => _player2;
+
     const getActivePlayer = () => _activePlayer;
 
     const _switchPlayer = () => {
@@ -255,6 +373,17 @@ const gameController = (() => {
                 _switchPlayer();
             }
 
+            // If the mode is hard, make the next move with AI
+            if (_mode === "hard" && gameBoard.getBoard().includes("")) {
+                const position = _player2.makeBestMove(gameBoard.getBoard());
+                // Update the value in the board
+                gameBoard.updateValue(position, _activePlayer.getMarker());
+                // Display the marker on the board
+                displayController.updateCell(document.getElementById(position.toString()), _activePlayer.getMarker());
+                // Switch player
+                _switchPlayer();
+            }
+
             // Check if the game is over
             [winner, positions] = _checkWinner();
             // If someone has won
@@ -290,6 +419,8 @@ const gameController = (() => {
         getActivePlayer,
         setMode,
         getMode,
+        getPlayer1,
+        getPlayer2,
     };
 })();
 
